@@ -4,7 +4,7 @@ from sklearn.linear_model import LinearRegression
 import torch.nn as nn
 import torch
 
-class ABITest(object):
+class ABITester(object):
     def __init__(self):
         self.MSE_loss = nn.MSELoss()
         
@@ -15,7 +15,6 @@ class ABITest(object):
         abi_sv = np.reshape(ts_sv, [ts_sv.shape[0] * ts_sv.shape[1], ts_sv.shape[2]])
         abi_ankle = abi_in[:, :, :, 0, :]
         abi_arm = abi_in[:, :, :, 1, :]
-        ylim = np.max(abi_sv)
         max_ankle = np.max(abi_ankle, axis = 3).squeeze()
         max_arm = np.max(abi_arm, axis = 3).squeeze()
         abi = max_ankle/max_arm
@@ -35,4 +34,4 @@ class ABITest(object):
         sv = torch.from_numpy(abi_sv.flatten())
         cali = torch.from_numpy(abi_cali.flatten())
         R_loss_abi = np.sqrt(self.MSE_loss(sv, cali).item())
-        return abi_sv, abi_cali, abi, R_loss_abi
+        return abi_sv, abi_cali, R_loss_abi
