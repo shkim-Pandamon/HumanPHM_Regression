@@ -76,13 +76,22 @@ class Regressor(object):
             # update Regressor network
             FE_ = self.FE(x_)
             SV_ = self.SV(FE_)
+            L_ = self.REG_L(FE_)
             PWV_ = self.REG_PWV(FE_)
             SV_loss = self.MSE_loss(sv_, SV_)
-            PWV_loss = self.MSE_loss(pwv_, PWV_)
-            N_PWV_loss = self.lossREG * (1 - torch.tanh(PWV_loss))
-            N_loss = (N_PWV_loss + N_PWV_loss)
+            d_L = torch.tanh(torch.abs(l_, L_))
+            d_PWV = torch.tanh(torch.abs(pwv_, PWV_))
+            L_loss = torch.mean(torch.log(1/(1-d_L)))
+            PWV_loss = torch.mean(torch.log(1/(1-d_PWV)))
+            # PWV_loss = self.MSE_loss(pwv_, PWV_)
+            # L_loss = self.MSE_loss(l_, L_)
+            N_PWV_loss = self.lossREG / PWV_loss
+            N_L_loss = self.lossREG / L_loss
+            # N_PWV_loss = self.lossREG * (1 - torch.tanh(PWV_loss))
+            # N_L_loss = self.lossREG * (1 - torch.tanh(L_loss))
+            N_loss = (N_PWV_loss + N_L_loss)
             self.train_hist['SV_loss_train'].append(np.sqrt(SV_loss.item()))
-            self.train_hist['REG_loss_train'].append(np.sqrt((PWV_loss.item() + PWV_loss.item())/2))
+            self.train_hist['REG_loss_train'].append(np.sqrt((PWV_loss.item() + L_loss.item())/2))
             
             self.FE_optimizer.zero_grad()
             self.SV_optimizer.zero_grad()
